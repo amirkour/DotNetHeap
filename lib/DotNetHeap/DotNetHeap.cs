@@ -5,6 +5,12 @@ namespace DotNetHeap
 {
     public class DotNetHeap<T> where T : IComparable<T>
     {
+        public enum HEAP_TYPE
+        {
+            MAX, // default
+            MIN
+        };
+
         protected T[] _queue;
         public T this[int i]
         {
@@ -13,17 +19,33 @@ namespace DotNetHeap
 
         protected int _numElements;
         public int NumElements { get { return _numElements; } }
+
+        protected HEAP_TYPE _heapType;
+        public HEAP_TYPE HeapType { get { return _heapType; } }
+
         protected Func<T, T, int> _magnitudeCompareTo;
 
-        public DotNetHeap()
+        // TODO - right now, this class depends on the magnitude-compare-to
+        //        delegate to determine how to objects of type T should be
+        //        ordered relative to one-another (eg: given objects of type T
+        //        A and B, how can we determine at runtime the 'difference' between
+        //        A and B ... aka, the magnitude between them.)
+        //        Don't let callers use the default ctor - they HAVE to pass an MCT delegate.
+        private DotNetHeap()
         {
             _queue = new T[10]; // TODO
             _numElements = 0;
+            _heapType = HEAP_TYPE.MAX;
         }
 
         public DotNetHeap(Func<T, T, int> mct) : this()
         {
             _magnitudeCompareTo = mct;
+        }
+
+        public DotNetHeap(Func<T, T, int> mct, HEAP_TYPE ht) : this(mct)
+        {
+            _heapType = ht;
         }
 
         public DotNetHeap<T> Enqueue(T thing)
@@ -33,9 +55,13 @@ namespace DotNetHeap
 
             _queue[++_numElements] = thing;
             int i = _numElements;
-            while (i > 1 && i / 2 >= 1 && _queue[i].CompareTo(_queue[i / 2]) > 0)
+            while (i > 1 && i / 2 >= 1) // && )
             {
-                this.Swap(i, i / 2);
+                if( (_heapType == HEAP_TYPE.MAX && _queue[i].CompareTo(_queue[i / 2]) > 0) ||
+                    (_heapType == HEAP_TYPE.MIN && _queue[i].CompareTo(_queue[i / 2]) < 0)){
+                    this.Swap(i, i / 2);
+                }
+                
                 i /= 2;
             }
 
@@ -87,48 +113,91 @@ namespace DotNetHeap
             int i = 1;
             T left;
             T right;
-            int leftComparisonValue = 0;
-            int rightComparisonValue = 0;
             int leftIndex = 0;
             int rightIndex = 0;
             int iSwap = 0;
             while (this.HasAtLeastOneChild(i, out left, out right, out leftIndex, out rightIndex))
             {
-                if (!Object.Equals(left, default(T)))
-                    leftComparisonValue = _magnitudeCompareTo(_queue[i], left);
-                if (!Object.Equals(right, default(T)))
-                    rightComparisonValue = _magnitudeCompareTo(_queue[i], right);
-
-                // if both children are smaller, swap w/ the one
-                // that's smallest by comparison
-                if (leftComparisonValue < 0 && rightComparisonValue < 0)
-                {
-                    iSwap = (Math.Abs(leftComparisonValue) > Math.Abs(rightComparisonValue)) ? leftIndex : rightIndex;
-                }
-                else if (leftComparisonValue < 0)
-                {
-                    iSwap = leftIndex;
-                }
-                else if (rightComparisonValue < 0)
-                {
-                    iSwap = rightIndex;
-                }
+                if ( (_heapType == HEAP_TYPE.MAX && this.TryGetMaxHeapSwapIndex(i, left, right, leftIndex, rightIndex, out iSwap)) ||
+                     (_heapType == HEAP_TYPE.MIN && this.TryGetMinHeapSwapIndex(i,left,right,leftIndex,rightIndex, out iSwap)) )
+                    this.Swap(i, iSwap);
                 else
-                {
-                    // neither child is smaller - we're done
                     break;
-                }
 
-                this.Swap(i, iSwap);
                 i = iSwap;
-                leftComparisonValue = 0;
-                rightComparisonValue = 0;
                 iSwap = 0;
                 leftIndex = 0;
                 rightIndex = 0;
             }
 
             return toRet;
+        }
+
+        protected bool TryGetMaxHeapSwapIndex(int parentIndex, T leftChild, T rightChild, int leftIndex, int rightIndex, out int iSwap){
+            int leftComparisonValue = 0;
+            int rightComparisonValue = 0;
+            iSwap = 0;
+
+            if (!Object.Equals(leftChild, default(T)))
+                leftComparisonValue = _magnitudeCompareTo(_queue[parentIndex], leftChild);
+            if (!Object.Equals(rightChild, default(T)))
+                rightComparisonValue = _magnitudeCompareTo(_queue[parentIndex], rightChild);
+
+            // if both children are smaller, swap w/ the one
+            // that's smallest by comparison
+            if (leftComparisonValue < 0 && rightComparisonValue < 0)
+            {
+                iSwap = (leftComparisonValue < rightComparisonValue) ? leftIndex : rightIndex;
+            }
+            else if (leftComparisonValue < 0)
+            {
+                iSwap = leftIndex;
+            }
+            else if (rightComparisonValue < 0)
+            {
+                iSwap = rightIndex;
+            }
+            else
+            {
+                // neither child is smaller - we're done
+                return false;
+            }
+
+            return true;
+        }
+
+        protected bool TryGetMinHeapSwapIndex(int parentIndex, T leftChild, T rightChild, int leftIndex, int rightIndex, out int iSwap)
+        {
+            int leftComparisonValue = 0;
+            int rightComparisonValue = 0;
+            iSwap = 0;
+
+            if (!Object.Equals(leftChild, default(T)))
+                leftComparisonValue = _magnitudeCompareTo(_queue[parentIndex], leftChild);
+            if (!Object.Equals(rightChild, default(T)))
+                rightComparisonValue = _magnitudeCompareTo(_queue[parentIndex], rightChild);
+
+            // if both children are larger, swap w/ the one
+            // that's largest by comparison
+            if (leftComparisonValue > 0 && rightComparisonValue > 0)
+            {
+                iSwap = (leftComparisonValue > rightComparisonValue) ? leftIndex : rightIndex;
+            }
+            else if (leftComparisonValue > 0)
+            {
+                iSwap = leftIndex;
+            }
+            else if (rightComparisonValue > 0)
+            {
+                iSwap = rightIndex;
+            }
+            else
+            {
+                // neither child is larger - we're done
+                return false;
+            }
+
+            return true;
         }
 
         public override string ToString()
