@@ -9,7 +9,7 @@ namespace DotNetHeap.Test
         DotNetHeap<int> _minHeap;
         public MinHeapTests()
         {
-            _minHeap = new DotNetHeap<int>((a,b) => {return a-b;}, DotNetHeap<int>.HEAP_TYPE.MIN);
+            _minHeap = new DotNetHeap<int>(DotNetHeap<int>.HEAP_TYPE.MIN);
         }
 
         [Fact]
