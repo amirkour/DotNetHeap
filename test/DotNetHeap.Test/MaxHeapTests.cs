@@ -10,7 +10,7 @@ namespace DotNetHeap.Test
 
         public MaxHeapTests()
         {
-            _heap = new DotNetHeap<int>((a, b) => { return a - b; });
+            _heap = new DotNetHeap<int>();
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace DotNetHeap.Test
             _heap.Enqueue(4);
             _heap.Enqueue(5);
             Assert.Equal(5, _heap.NumElements);
-            
+
             Assert.Equal(5, _heap.Dequeue());
             Assert.Equal(4, _heap.Peek());
             Assert.Equal(4, _heap.NumElements);
