@@ -6,7 +6,7 @@ namespace DotNetHeap.Test
 {
     public class MinHeapTests
     {
-        DotNetHeap<int> _minHeap;
+        protected DotNetHeap<int> _minHeap;
         public MinHeapTests()
         {
             _minHeap = new DotNetHeap<int>(DotNetHeap<int>.HEAP_TYPE.MIN);
@@ -57,6 +57,25 @@ namespace DotNetHeap.Test
 
             Assert.Equal(default(int), _minHeap.Dequeue());
             Assert.Equal(0, _minHeap.NumElements);
+        }
+
+        [Theory]
+        [InlineData(new int[] { 4, 1, 6, 9, -2 }, -2, 5, new int[] { 10, 20, 30 }, 10, 3)]
+        public void MinHeap_ClearSmokeTest(int[] firstList, int expectedFirstMin, int expectedFirstSize,
+                                   int[] secondList, int expectedSecondMin, int expectedSecondSize)
+        {
+            Array.ForEach<int>(firstList, x => _minHeap.Enqueue(x));
+            Assert.Equal(expectedFirstMin, _minHeap.Peek());
+            Assert.Equal(expectedFirstSize, _minHeap.NumElements);
+
+            _minHeap.Clear();
+            Assert.Equal(0, _minHeap.NumElements);
+            Assert.Equal(default(int), _minHeap.Peek());
+            Assert.Equal(default(int), _minHeap.Dequeue());
+
+            Array.ForEach<int>(secondList, x => _minHeap.Enqueue(x));
+            Assert.Equal(expectedSecondMin, _minHeap.Peek());
+            Assert.Equal(expectedSecondSize, _minHeap.NumElements);
         }
     }
 }

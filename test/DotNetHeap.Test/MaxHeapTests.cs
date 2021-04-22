@@ -62,5 +62,24 @@ namespace DotNetHeap.Test
             Assert.Equal(0, _heap.Peek());
             Assert.Equal(0, _heap.NumElements);
         }
+
+        [Theory]
+        [InlineData(new int[] { 4, 1, 6, 9, -2 }, 9, 5, new int[] { 10, 20, 30 }, 30, 3)]
+        public void MaxHeap_ClearSmokeTest(int[] firstList, int expectedFirstMax, int expectedFirstSize,
+                                           int[] secondList, int expectedSecondMax, int expectedSecondSize)
+        {
+            Array.ForEach<int>(firstList, x => _heap.Enqueue(x));
+            Assert.Equal(expectedFirstMax, _heap.Peek());
+            Assert.Equal(expectedFirstSize, _heap.NumElements);
+
+            _heap.Clear();
+            Assert.Equal(0, _heap.NumElements);
+            Assert.Equal(default(int), _heap.Peek());
+            Assert.Equal(default(int), _heap.Dequeue());
+
+            Array.ForEach<int>(secondList, x => _heap.Enqueue(x));
+            Assert.Equal(expectedSecondMax, _heap.Peek());
+            Assert.Equal(expectedSecondSize, _heap.NumElements);
+        }
     }
 }

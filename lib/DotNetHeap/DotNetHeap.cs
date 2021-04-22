@@ -182,6 +182,12 @@ namespace DotNetHeap
             return true;
         }
 
+        public DotNetHeap<T> Clear()
+        {
+            _numElements = 0;
+            return this;
+        }
+
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder("[ ");
