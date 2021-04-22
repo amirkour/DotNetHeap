@@ -14,7 +14,7 @@ namespace DotNetHeap
         protected T[] _queue;
         public T this[int i]
         {
-            get { return _queue[i + 1]; }
+            get { return _queue[i + 1]; }   // users can reference 0-based, but this implementation indexes starting at 1
         }
 
         protected int _numElements;
