@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using DotNetHeap.Utils;
 
 namespace DotNetHeap
 {
@@ -38,7 +39,7 @@ namespace DotNetHeap
         public DotNetHeap<T> Enqueue(T thing)
         {
             if (_numElements + 1 == _queue.Length)
-                _queue = this.GetABiggerQueue();
+                _queue = DotNetHeapUtils.TransferToBiggerArray(_queue);
 
             _queue[++_numElements] = thing;
             int i = _numElements;
@@ -47,7 +48,7 @@ namespace DotNetHeap
                 if ((_heapType == HEAP_TYPE.MAX && _queue[i].CompareTo(_queue[i / 2]) > 0) ||
                     (_heapType == HEAP_TYPE.MIN && _queue[i].CompareTo(_queue[i / 2]) < 0))
                 {
-                    this.Swap(i, i / 2);
+                    _queue.Swap(i, i / 2);
                 }
 
                 i /= 2;
@@ -108,7 +109,7 @@ namespace DotNetHeap
             {
                 if ((_heapType == HEAP_TYPE.MAX && this.TryGetMaxHeapSwapIndex(i, left, right, leftIndex, rightIndex, out iSwap)) ||
                      (_heapType == HEAP_TYPE.MIN && this.TryGetMinHeapSwapIndex(i, left, right, leftIndex, rightIndex, out iSwap)))
-                    this.Swap(i, iSwap);
+                    _queue.Swap(i, iSwap);
                 else
                     break;
 
@@ -200,20 +201,6 @@ namespace DotNetHeap
             return sb.ToString();
         }
 
-        protected void Swap(int i, int j)
-        {
-            T temp = _queue[i];
-            _queue[i] = _queue[j];
-            _queue[j] = temp;
-        }
 
-        protected T[] GetABiggerQueue()
-        {
-            T[] newQ = new T[_queue.Length + 20];
-            for (int i = 0; i < _queue.Length; i++)
-                newQ[i] = _queue[i];
-
-            return newQ;
-        }
     }
 }
