@@ -7,13 +7,31 @@ namespace DotNetHeap.Utils
     public static class DotNetHeapUtils
     {
         public const int HEAP_DEFAULT_SIZE = 20;
-        public static void Swap<T>(this T[] heap, int i, int j)
+
+        /// <summary>
+        /// Array extension that swaps the items at the given indices i and j
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="arr"></param>
+        /// <param name="i"></param>
+        /// <param name="j"></param>
+        public static void Swap<T>(this T[] arr, int i, int j)
         {
-            T temp = heap[i];
-            heap[i] = heap[j];
-            heap[j] = temp;
+            T temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
         }
 
+        /// <summary>
+        /// Helper that expands the given original array by the given
+        /// <paramref name="additionalSpace"/> amount, and copies the
+        /// contents of <paramref name="original"/> into the returned
+        /// array.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="original"></param>
+        /// <param name="additionalSpace"></param>
+        /// <returns></returns>
         public static T[] TransferToBiggerArray<T>(T[] original, int additionalSpace = HEAP_DEFAULT_SIZE)
         {
             additionalSpace = additionalSpace > 0 ? additionalSpace : HEAP_DEFAULT_SIZE;
