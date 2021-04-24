@@ -111,5 +111,26 @@ namespace DotNetHeap.Test
                     throw new Exception("Should not have been able to find " + toRemove + " after removal");
             }
         }
+
+        [Theory]
+        [InlineData(new int[] { 10, 20, 30, 21 }, 21)]
+        [InlineData(new int[] { 20, 10, 30, 21 }, 21)]
+        public void Remove_Greater_Than_Both_Children_Removes_It(int[] elements, int toRemove)
+        {
+            _heap.Enqueue(elements).Remove(toRemove);
+            Assert.Equal(3, _heap.NumElements);
+            for (int i = 0; i < _heap.NumElements; i++)
+            {
+                if (_heap[i] == toRemove)
+                    throw new Exception("Should not have been able to find " + toRemove + " after removal");
+            }
+        }
+
+        [Fact]
+        public void Remove_Non_Existing_Item_Does_Nothing()
+        {
+            _heap.Enqueue(new int[]{10,20,30}).Remove(5);
+            Assert.Equal(3, _heap.NumElements);
+        }
     }
 }
