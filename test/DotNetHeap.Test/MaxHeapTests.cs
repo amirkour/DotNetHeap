@@ -81,5 +81,35 @@ namespace DotNetHeap.Test
             Assert.Equal(expectedSecondMax, _heap.Peek());
             Assert.Equal(expectedSecondSize, _heap.NumElements);
         }
+
+        [Fact]
+        public void Remove_Greater_Than_Root_Does_Nothing()
+        {
+            _heap.Enqueue(10).Enqueue(20).Enqueue(30).Remove(40);
+            Assert.Equal(3, _heap.NumElements);
+            Assert.Equal(30, _heap[0]);
+        }
+
+        [Fact]
+        public void Remove_Equal_To_Root_Removes_It()
+        {
+            _heap.Enqueue(10).Enqueue(20).Enqueue(30).Remove(30);
+            Assert.Equal(2, _heap.NumElements);
+            Assert.NotEqual(30, _heap[0]);
+        }
+
+        [Theory]
+        [InlineData(new int[] { 10, 20, 30, 19 }, 19)]
+        [InlineData(new int[] { 20, 10, 30, 19 }, 19)]
+        public void Remove_Greater_Than_One_Child_Removes_It(int[] elements, int toRemove)
+        {
+            _heap.Enqueue(elements).Remove(toRemove);
+            Assert.Equal(3, _heap.NumElements);
+            for (int i = 0; i < _heap.NumElements; i++)
+            {
+                if (_heap[i] == toRemove)
+                    throw new Exception("Should not have been able to find " + toRemove + " after removal");
+            }
+        }
     }
 }

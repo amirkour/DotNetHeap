@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Collections.Generic;
 using DotNetHeap.Utils;
 
 namespace DotNetHeap
@@ -57,6 +58,17 @@ namespace DotNetHeap
             return this;
         }
 
+        public DotNetHeap<T> Enqueue(IEnumerable<T> things)
+        {
+            if(things != null)
+            {
+                foreach(T next in things)
+                    this.Enqueue(next);
+            }
+
+            return this;
+        }
+
         public T Peek()
         {
             return _numElements <= 0 ? default(T) : _queue[1];
@@ -91,15 +103,11 @@ namespace DotNetHeap
             return found;
         }
 
-        public T Dequeue()
+        protected void HeapifyDownStartingAt(int i)
         {
-            if (_numElements <= 0)
-                return default(T);
+            if (i < 1 || i >= _numElements)
+                return;
 
-            T toRet = _queue[1];
-            _queue[1] = _queue[_numElements];
-            _queue[_numElements--] = default(T);
-            int i = 1;
             T left;
             T right;
             int leftIndex = 0;
@@ -118,6 +126,118 @@ namespace DotNetHeap
                 leftIndex = 0;
                 rightIndex = 0;
             }
+        }
+
+        public void Remove(T thingToRemove)
+        {
+            if (_numElements <= 0)
+                return;
+
+            if (_heapType == HEAP_TYPE.MAX && _queue[1].CompareTo(thingToRemove) < 0)
+                return;
+            if (_heapType == HEAP_TYPE.MIN && _queue[1].CompareTo(thingToRemove) > 0)
+                return;
+
+            List<Tuple<int, T>> stack = new List<Tuple<int, T>>();
+            int iSwap = -1;
+            stack.Push(new Tuple<int, T>(1, _queue[1]));
+            while (stack.Count > 0)
+            {
+                Tuple<int, T> next = stack.Pop();
+                if (next.Item2.Equals(thingToRemove))
+                {
+                    iSwap = next.Item1;
+                    break;
+                }
+
+                T left;
+                T right;
+                int leftIndex;
+                int rightIndex;
+                if (!this.HasAtLeastOneChild(next.Item1, out left, out right, out leftIndex, out rightIndex))
+                    break;
+
+                if (_heapType == HEAP_TYPE.MAX)
+                {
+                    if (!Object.Equals(left, default(T)))
+                    {
+                        int comparison = thingToRemove.CompareTo(left);
+                        if (comparison == 0)
+                        {
+                            iSwap = leftIndex;
+                            break;
+                        }
+                        else if (comparison < 0)
+                        {
+                            stack.Push(new Tuple<int, T>(leftIndex, left));
+                        }
+                    }
+                    if (!Object.Equals(right, default(T)))
+                    {
+                        int comparison = thingToRemove.CompareTo(right);
+                        if (comparison == 0)
+                        {
+                            iSwap = rightIndex;
+                            break;
+                        }
+                        else if (comparison < 0)
+                        {
+                            stack.Push(new Tuple<int, T>(rightIndex, right));
+                        }
+                    }
+                }
+                else
+                {
+                    if (!Object.Equals(left, default(T)))
+                    {
+                        int comparison = thingToRemove.CompareTo(left);
+                        if (comparison == 0)
+                        {
+                            iSwap = leftIndex;
+                            break;
+                        }
+                        else if (comparison > 0)
+                        {
+                            stack.Push(new Tuple<int, T>(leftIndex, left));
+                        }
+                    }
+                    if (!Object.Equals(right, default(T)))
+                    {
+                        int comparison = thingToRemove.CompareTo(right);
+                        if (comparison == 0)
+                        {
+                            iSwap = rightIndex;
+                            break;
+                        }
+                        else if (comparison > 0)
+                        {
+                            stack.Push(new Tuple<int, T>(rightIndex, right));
+                        }
+                    }
+                }
+            }
+
+            // didn't find the thing that the caller wanted to remove.
+            // so ... nothin to do but bail.
+            if (iSwap == -1)
+                return;
+
+            // otherwise, move the last item up to this index
+            // and heapify to preserve the integrity of the heap
+            _queue[iSwap] = _queue[_numElements];
+            _queue[_numElements--] = default(T);
+            this.HeapifyDownStartingAt(iSwap);
+        }
+
+        public T Dequeue()
+        {
+            if (_numElements <= 0)
+                return default(T);
+
+            T toRet = _queue[1];
+            _queue[1] = _queue[_numElements];
+            _queue[_numElements--] = default(T);
+            this.HeapifyDownStartingAt(1);
 
             return toRet;
         }
@@ -161,22 +281,29 @@ namespace DotNetHeap
             iSwap = 0;
             T parent = _queue[parentIndex];
 
-            if (!Object.Equals(leftChild, default(T)) && !Object.Equals(rightChild, default(T))){
-                if(parent.CompareTo(leftChild) < 0 && parent.CompareTo(rightChild) < 0)
+            if (!Object.Equals(leftChild, default(T)) && !Object.Equals(rightChild, default(T)))
+            {
+                if (parent.CompareTo(leftChild) < 0 && parent.CompareTo(rightChild) < 0)
                     return false;
 
                 iSwap = leftChild.CompareTo(rightChild) < 0 ? leftIndex : rightIndex;
-            }else if(!Object.Equals(leftChild, default(T))){
-                if(parent.CompareTo(leftChild) < 0)
+            }
+            else if (!Object.Equals(leftChild, default(T)))
+            {
+                if (parent.CompareTo(leftChild) < 0)
                     return false;
 
                 iSwap = leftIndex;
-            }else if(!Object.Equals(rightChild, default(T))){
-                if(parent.CompareTo(rightChild) < 0)
+            }
+            else if (!Object.Equals(rightChild, default(T)))
+            {
+                if (parent.CompareTo(rightChild) < 0)
                     return false;
 
                 iSwap = rightIndex;
-            }else{
+            }
+            else
+            {
                 return false;
             }
 

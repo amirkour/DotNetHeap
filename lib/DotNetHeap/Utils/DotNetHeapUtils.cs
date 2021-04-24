@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using System.Collections.Generic;
 using DotNetHeap;
 
 namespace DotNetHeap.Utils
@@ -35,7 +36,7 @@ namespace DotNetHeap.Utils
         public static T[] TransferToBiggerArray<T>(T[] original, int additionalSpace = HEAP_DEFAULT_SIZE)
         {
             additionalSpace = additionalSpace > 0 ? additionalSpace : HEAP_DEFAULT_SIZE;
-            if(original == null || original.Length <= 0)
+            if (original == null || original.Length <= 0)
                 return new T[additionalSpace];
 
             T[] newQ = new T[original.Length + additionalSpace];
@@ -43,6 +44,24 @@ namespace DotNetHeap.Utils
                 newQ[i] = original[i];
 
             return newQ;
+        }
+
+        public static List<T> Push<T>(this List<T> stack, T thing)
+        {
+            if (stack == null)
+                return null;
+
+            stack.Add(thing);
+            return stack;
+        }
+        public static T Pop<T>(this List<T> stack)
+        {
+            if (stack == null || stack.Count <= 0)
+                return default(T);
+
+            T thing = stack[stack.Count - 1];
+            stack.RemoveAt(stack.Count - 1);
+            return thing;
         }
     }
 }
