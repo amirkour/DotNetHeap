@@ -155,11 +155,11 @@ namespace DotNetHeap
                 int leftIndex;
                 int rightIndex;
                 if (!this.HasAtLeastOneChild(next.Item1, out left, out right, out leftIndex, out rightIndex))
-                    break;
+                    continue;
 
                 if (_heapType == HEAP_TYPE.MAX)
                 {
-                    if (!Object.Equals(left, default(T)))
+                    if (leftIndex > 0)
                     {
                         int comparison = thingToRemove.CompareTo(left);
                         if (comparison == 0)
@@ -172,7 +172,7 @@ namespace DotNetHeap
                             stack.Push(new Tuple<int, T>(leftIndex, left));
                         }
                     }
-                    if (!Object.Equals(right, default(T)))
+                    if (rightIndex > 0)
                     {
                         int comparison = thingToRemove.CompareTo(right);
                         if (comparison == 0)
@@ -188,7 +188,7 @@ namespace DotNetHeap
                 }
                 else
                 {
-                    if (!Object.Equals(left, default(T)))
+                    if (leftIndex > 0)
                     {
                         int comparison = thingToRemove.CompareTo(left);
                         if (comparison == 0)
@@ -201,7 +201,7 @@ namespace DotNetHeap
                             stack.Push(new Tuple<int, T>(leftIndex, left));
                         }
                     }
-                    if (!Object.Equals(right, default(T)))
+                    if (rightIndex > 0)
                     {
                         int comparison = thingToRemove.CompareTo(right);
                         if (comparison == 0)
